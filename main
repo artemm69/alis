@@ -73,6 +73,8 @@ def handle_dialog(req, res):
         }
         # Заполняем текст ответа
         res['response']['text'] = 'Привет! Кликай!'
+        score.reset_value()
+        money_score.reset_value()
         # Получим подсказки
         res['response']['buttons'] = get_suggests(user_id)
         return
@@ -91,6 +93,7 @@ def handle_dialog(req, res):
         # Пользователь согласился, прощаемся.
         res['response']['text'] = 'Пока'
         res['response']['end_session'] = True
+
         return
 
     elif req['request']['original_utterance'].lower() in [
@@ -100,7 +103,7 @@ def handle_dialog(req, res):
     ]:
 
         res['response']['text'] = \
-            f"Счет:{score.new_value()}"
+            f"HP телефона:{score.new_value()}, Деньги:{money_score.new_value()}"
         res['response']['buttons'] = get_suggests(user_id)
 
 
@@ -118,17 +121,35 @@ def get_suggests(user_id):
 
 
 class Phoneone:
-
     def __init__(self):
         self._value = 10000
 
     def new_value(self):
         self._value -= 1
+        return self._value
+    def reset_value(self):
+        self._value = 10000
 
-
+    def get_value(self):
         return self._value
 
+class Money:
+
+    def __init__(self):
+        self._value = 0
+
+    def new_value(self):
+        self._value += 1
+        return self._value
+    def reset_value(self):
+        self._value = 0
+
+    def get_value(self):
+        return self._value
+
+
 score = Phoneone()
+money_score = Money()
 
 if __name__ == '__main__':
     app.run()
