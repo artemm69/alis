@@ -27,7 +27,6 @@ logging.basicConfig(level=logging.INFO)
 sessionStorage = {}
 
 
-
 @app.route('/post', methods=['POST'])
 # Функция получает тело запроса и возвращает ответ.
 # Внутри функции доступен request.json - это JSON,
@@ -58,7 +57,6 @@ def main():
 
 def handle_dialog(req, res):
     user_id = req['session']['user_id']
-
 
     if req['session']['new']:
         # Это новый пользователь.
@@ -101,10 +99,20 @@ def handle_dialog(req, res):
         'клик lvl 1'
 
     ]:
+        img = '1533899/000f7e0fbb0387387aa8'
+        dop = "\n ЧТО ЖЕ ТАМ?"
+        if score.get_value() <= 900:
+            img = '1533899/7ac82c459e80473fec5e'
+            dop = "\n ПЕРВЫЕ ТРЕЩИНЫ"
 
-        res['response']['text'] = \
-            f"HP телефона:{score.new_value()}, Деньги:{money_score.new_value()}"
         res['response']['buttons'] = get_suggests(user_id)
+        res['response']['card'] = {}
+        res['response']['card']['type'] = 'BigImage'
+        res['response']['card'][
+            'title'] = f"HP яйца:{score.new_value()}, Деньги:{money_score.new_value()}" + dop
+        res['response']['card']['image_id'] = img
+        res['response']['text'] = 'Тогда сыграем!'
+
 
 
 # Функция возвращает две подсказки для ответа.
@@ -122,16 +130,18 @@ def get_suggests(user_id):
 
 class Phoneone:
     def __init__(self):
-        self._value = 10000
+        self._value = 1000
 
     def new_value(self):
         self._value -= 1
         return self._value
+
     def reset_value(self):
-        self._value = 10000
+        self._value = 1000
 
     def get_value(self):
         return self._value
+
 
 class Money:
 
@@ -141,6 +151,7 @@ class Money:
     def new_value(self):
         self._value += 1
         return self._value
+
     def reset_value(self):
         self._value = 0
 
