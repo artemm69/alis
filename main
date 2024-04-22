@@ -101,9 +101,32 @@ def handle_dialog(req, res):
     ]:
         img = '1533899/000f7e0fbb0387387aa8'
         dop = "\n ЧТО ЖЕ ТАМ?"
-        if score.get_value() <= 900:
+        if score.get_value() <= 900 and score.get_value() > 800:
             img = '1533899/7ac82c459e80473fec5e'
             dop = "\n ПЕРВЫЕ ТРЕЩИНЫ"
+
+        elif score.get_value() <= 800 and score.get_value() > 700:
+            img = '1540737/a9ab859037db19b5f8d9'
+            dop = "\n ТРЕЩИНЫ СТАНОВЯТСЯ БОЛЬШЕ"
+
+        elif score.get_value() <= 700 and score.get_value() > 600:
+            img = '1656841/8d5c606d2f2efbab3a84'
+            dop = "\n КАЖЕТСЯ ТАМ ЧТО ТО ЕСТЬ!"
+
+        elif score.get_value() <= 600 and score.get_value() > 400:
+            img = '1533899/0d1eb5d091b78c8013b7'
+            dop = "\n ЕГО УЖЕ ВИДНО!"
+
+        elif score.get_value() <= 400 and score.get_value() > 100:
+            img = '965417/9f5229e9cbde69a4831c'
+            dop = "\n ДОБЕЙ ЭТУ СКОРЛУПУ!!!"
+
+        elif score.get_value() <= 100 and score.get_value() > 0:
+            img = '965417/d4c453dc4eaa1f0953fe'
+            dop = "\n ЕЩЕ НЕМНОГО!!!!!!!!!!!"
+        elif score.get_value() == 0:
+            img = '1540737/3bd1c88353711b6524e0'
+            dop = "\n ТЫ СПРАВИЛСЯ! ПОБЕДА!!!"
 
         res['response']['buttons'] = get_suggests(user_id)
         res['response']['card'] = {}
@@ -133,8 +156,11 @@ class Phoneone:
         self._value = 1000
 
     def new_value(self):
-        self._value -= 1
-        return self._value
+        if self._value > 0:
+            self._value -= 1
+            return self._value
+        else:
+            return 0
 
     def reset_value(self):
         self._value = 1000
