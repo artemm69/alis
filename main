@@ -65,14 +65,14 @@ def handle_dialog(req, res):
 
         sessionStorage[user_id] = {
             'suggests': [
-                "Клик lvl 1",
-                "Выход"
+                "Клик",
+                "Улучшения",
+                "Выход",
             ]
         }
         # Заполняем текст ответа
-        res['response']['text'] = 'Привет! Кликай!'
+        res['response']['text'] = 'Привет! Это обычное яйцо. Что в нём такого? Но погодите..кажется в нём кто-то есть! Давайте поможем маленькому утёнку выбраться из этого яичка. Для того, чтобы наносить удары по яйцу, нужно нажать на кнопку "клик".'
         score.reset_value()
-        money_score.reset_value()
         # Получим подсказки
         res['response']['buttons'] = get_suggests(user_id)
         return
@@ -96,7 +96,7 @@ def handle_dialog(req, res):
 
     elif req['request']['original_utterance'].lower() in [
 
-        'клик lvl 1'
+        'клик'
 
     ]:
         img = '1533899/000f7e0fbb0387387aa8'
@@ -126,16 +126,35 @@ def handle_dialog(req, res):
             dop = "\n ЕЩЕ НЕМНОГО!!!!!!!!!!!"
         elif score.get_value() == 0:
             img = '1540737/3bd1c88353711b6524e0'
-            dop = "\n ТЫ СПРАВИЛСЯ! ПОБЕДА!!!"
+            dop = "\n ТЫ СПРАВИЛСЯ! ПОБЕДА!!! СПАСИБО ЗА ИГРУ!!!"
+            res['response']['end_session'] = True
 
         res['response']['buttons'] = get_suggests(user_id)
         res['response']['card'] = {}
         res['response']['card']['type'] = 'BigImage'
         res['response']['card'][
-            'title'] = f"HP яйца:{score.new_value()}, Деньги:{money_score.new_value()}" + dop
+            'title'] = f"HP яйца: {score.new_value()}" + dop
         res['response']['card']['image_id'] = img
         res['response']['text'] = 'Тогда сыграем!'
 
+    elif req['request']['original_utterance'].lower() in [
+
+        'улучшения'
+
+    ]:
+        lv1 = 'закрыто'
+        lv2 = 'закрыто'
+        lv3 = 'закрыто'
+        if score.get_value() <= 950 and score.get_value() > 850:
+            lv1 = 'открыто'
+        if score.get_value() <= 850 and score.get_value() > 650:
+            lv2 = 'открыто'
+        if score.get_value() <= 650 and score.get_value() >= 0:
+            lv3 = 'открыто'
+
+        res['response']['buttons'] = get_suggests(user_id)
+        res['response'][
+            'text'] = f'Доступные улучшения: \n 1) урон каждого клика - 2 [{lv1}] \n 2) урон каждого клика - 4 [{lv2}] \n 3) урон каждого клика - 8 [{lv3}]'
 
 
 # Функция возвращает две подсказки для ответа.
@@ -157,8 +176,21 @@ class Phoneone:
 
     def new_value(self):
         if self._value > 0:
-            self._value -= 1
-            return self._value
+            if score.get_value() <= 950 and score.get_value() > 850:
+                self._value -= 10
+                return self._value
+            elif score.get_value() <= 850 and score.get_value() > 650:
+                self._value -= 50
+                return self._value
+            elif score.get_value() <= 650 and score.get_value() > 0 and score.get_value() != 2:
+                self._value -= 8
+                return self._value
+            elif score.get_value() > 950:
+                self._value -= 1
+                return self._value
+            elif score.get_value() == 2:
+                self._value -= 2
+                return self._value
         else:
             return 0
 
@@ -169,24 +201,7 @@ class Phoneone:
         return self._value
 
 
-class Money:
-
-    def __init__(self):
-        self._value = 0
-
-    def new_value(self):
-        self._value += 1
-        return self._value
-
-    def reset_value(self):
-        self._value = 0
-
-    def get_value(self):
-        return self._value
-
-
 score = Phoneone()
-money_score = Money()
 
 if __name__ == '__main__':
     app.run()
